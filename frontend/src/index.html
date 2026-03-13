@@ -36,6 +36,188 @@
             margin-bottom: 30px;
         }
         
+        /* Goal Tabs */
+        .goal-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .goal-tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .goal-tab:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .goal-tab.active {
+            background: white;
+            color: #667eea;
+            border-color: white;
+        }
+        
+        .goal-tab .week-badge {
+            background: rgba(0,0,0,0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+        
+        .goal-tab.active .week-badge {
+            background: rgba(102,126,234,0.2);
+        }
+        
+        .btn-new-goal {
+            padding: 10px 20px;
+            background: #10b981;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+        
+        .btn-new-goal:hover {
+            background: #059669;
+        }
+        
+        /* Goal Progress Bar */
+        .goal-progress {
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            color: white;
+        }
+        
+        .goal-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .goal-progress-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .goal-progress-week {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .goal-progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .goal-progress-fill {
+            height: 100%;
+            background: #10b981;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .goal-progress-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .modal h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .modal input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        
+        .modal input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .modal .btn-cancel {
+            padding: 10px 20px;
+            background: #e5e7eb;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        
+        .modal .btn-submit {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        
+        .modal .btn-submit:hover {
+            background: #5568d3;
+        }
+        
         /* Stats Section */
         .stats-grid {
             display: grid;
@@ -241,6 +423,16 @@
             background: #dc2626;
         }
         
+        /* Goal info on task */
+        .task-goal-badge {
+            background: #ede9fe;
+            color: #7c3aed;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -304,12 +496,47 @@
             font-weight: bold;
             color: #333;
         }
+        
+        /* Delete goal button */
+        .btn-delete-goal {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        
+        .btn-delete-goal:hover {
+            color: #fee2e2;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📅 12-Week Year</h1>
         <p class="subtitle">Track your goals and measure your progress</p>
+        
+        <!-- Goal Tabs -->
+        <div class="goal-tabs" id="goalTabs">
+            <button class="btn-new-goal" onclick="showNewGoalModal()">+ New Goal</button>
+        </div>
+        
+        <!-- Goal Progress -->
+        <div class="goal-progress" id="goalProgress" style="display: none;">
+            <div class="goal-progress-header">
+                <span class="goal-progress-title" id="progressGoalName">--</span>
+                <span class="goal-progress-week" id="progressWeek">Week 1/12</span>
+            </div>
+            <div class="goal-progress-bar">
+                <div class="goal-progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+            <div class="goal-progress-stats">
+                <span id="progressTasks">0/0 tasks</span>
+                <span id="progressScore">Score: 0%</span>
+            </div>
+        </div>
         
         <!-- Stats Section -->
         <div class="stats-grid">
@@ -338,6 +565,9 @@
             <!-- Add Task Form -->
             <form class="add-task-form" id="addTaskForm">
                 <input type="text" id="taskTitle" placeholder="Enter task title..." required>
+                <select id="taskGoal">
+                    <option value="">No Goal</option>
+                </select>
                 <select id="taskPriority">
                     <option value="low">Low Priority</option>
                     <option value="medium" selected>Medium Priority</option>
@@ -363,12 +593,28 @@
             </div>
         </div>
     </div>
+    
+    <!-- New Goal Modal -->
+    <div class="modal-overlay" id="newGoalModal">
+        <div class="modal">
+            <h2>Create New Goal</h2>
+            <form onsubmit="createGoal(event)">
+                <input type="text" id="goalName" placeholder="Enter goal name..." required>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="hideNewGoalModal()">Cancel</button>
+                    <button type="submit" class="btn-submit">Create Goal</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         const API_BASE = 'https://one2-week-year.onrender.com/api';
         
         // State
         let tasks = [];
+        let goals = [];
+        let currentGoalId = null;
         
         // DOM Elements
         const taskList = document.getElementById('taskList');
@@ -384,10 +630,138 @@
             }, 5000);
         }
         
-        // Fetch all tasks
+        // Modal functions
+        function showNewGoalModal() {
+            document.getElementById('newGoalModal').classList.add('active');
+            document.getElementById('goalName').focus();
+        }
+        
+        function hideNewGoalModal() {
+            document.getElementById('newGoalModal').classList.remove('active');
+            document.getElementById('goalName').value = '';
+        }
+        
+        // Create goal
+        async function createGoal(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('goalName').value.trim();
+            if (!name) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/goals`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        start_date: new Date().toISOString()
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to create goal');
+                
+                hideNewGoalModal();
+                await fetchGoals();
+            } catch (error) {
+                showError('Failed to create goal: ' + error.message);
+            }
+        }
+        
+        // Fetch all goals
+        async function fetchGoals() {
+            try {
+                const response = await fetch(`${API_BASE}/goals`);
+                if (!response.ok) throw new Error('Failed to fetch goals');
+                goals = await response.json();
+                renderGoalTabs();
+                updateGoalSelect();
+                
+                // Select first goal if none selected
+                if (goals.length > 0 && !currentGoalId) {
+                    selectGoal(goals[0].id);
+                } else if (currentGoalId) {
+                    // Refresh current goal progress
+                    fetchGoalProgress(currentGoalId);
+                }
+            } catch (error) {
+                console.error('Error fetching goals:', error);
+            }
+        }
+        
+        // Render goal tabs
+        function renderGoalTabs() {
+            const tabsContainer = document.getElementById('goalTabs');
+            const newGoalBtn = `<button class="btn-new-goal" onclick="showNewGoalModal()">+ New Goal</button>`;
+            
+            if (goals.length === 0) {
+                tabsContainer.innerHTML = newGoalBtn;
+                document.getElementById('goalProgress').style.display = 'none';
+                return;
+            }
+            
+            const tabs = goals.map(goal => `
+                <button class="goal-tab ${goal.id === currentGoalId ? 'active' : ''}" 
+                    onclick="selectGoal(${goal.id})">
+                    ${escapeHtml(goal.name)}
+                    <span class="week-badge">W${goal.week_number}/12</span>
+                </button>
+            `).join('');
+            
+            tabsContainer.innerHTML = tabs + newGoalBtn;
+        }
+        
+        // Update goal select dropdown
+        function updateGoalSelect() {
+            const select = document.getElementById('taskGoal');
+            select.innerHTML = '<option value="">No Goal</option>' + 
+                goals.map(g => `<option value="${g.id}">${escapeHtml(g.name)}</option>`).join('');
+        }
+        
+        // Select a goal
+        function selectGoal(goalId) {
+            currentGoalId = goalId;
+            renderGoalTabs();
+            fetchTasks();
+            fetchGoalProgress(goalId);
+        }
+        
+        // Fetch goal progress
+        async function fetchGoalProgress(goalId) {
+            try {
+                const response = await fetch(`${API_BASE}/goals/${goalId}/progress`);
+                if (!response.ok) throw new Error('Failed to fetch progress');
+                const data = await response.json();
+                renderGoalProgress(data);
+            } catch (error) {
+                console.error('Error fetching goal progress:', error);
+                document.getElementById('goalProgress').style.display = 'none';
+            }
+        }
+        
+        // Render goal progress
+        function renderGoalProgress(data) {
+            const progressEl = document.getElementById('goalProgress');
+            progressEl.style.display = 'block';
+            
+            document.getElementById('progressGoalName').textContent = data.goal_name;
+            document.getElementById('progressWeek').textContent = `Week ${data.week_number}/12`;
+            document.getElementById('progressBar').style.width = `${data.score}%`;
+            document.getElementById('progressTasks').textContent = 
+                `${data.completed_tasks}/${data.total_tasks} tasks`;
+            document.getElementById('progressScore').textContent = 
+                `Score: ${data.score}%`;
+        }
+        
+        // Fetch all tasks (optionally filtered by goal)
         async function fetchTasks() {
             try {
-                const response = await fetch(`${API_BASE}/tasks`);
+                let url = `${API_BASE}/tasks`;
+                if (currentGoalId) {
+                    url += `?goal_id=${currentGoalId}`;
+                }
+                const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch tasks');
                 tasks = await response.json();
                 renderTasks();
@@ -461,6 +835,13 @@
             document.getElementById('weekProgress').textContent = `${score}%`;
         }
         
+        // Get goal name by ID
+        function getGoalName(goalId) {
+            if (!goalId) return '';
+            const goal = goals.find(g => g.id === goalId);
+            return goal ? goal.name : '';
+        }
+        
         // Render tasks
         function renderTasks() {
             if (tasks.length === 0) {
@@ -480,6 +861,7 @@
                     <div class="task-content">
                         <div class="task-title ${task.completed ? 'completed' : ''}">${escapeHtml(task.title)}</div>
                         <div class="task-meta">
+                            ${task.goal_id ? `<span class="task-goal-badge">${escapeHtml(getGoalName(task.goal_id))}</span>` : ''}
                             <span class="badge badge-${task.status || 'pending'}">${task.status || 'pending'}</span>
                             <span class="badge badge-${task.priority || 'medium'}">${task.priority || 'medium'}</span>
                         </div>
@@ -506,30 +888,42 @@
             event.preventDefault();
             
             const title = document.getElementById('taskTitle').value.trim();
+            const goalId = document.getElementById('taskGoal').value;
             const priority = document.getElementById('taskPriority').value;
             const status = document.getElementById('taskStatus').value;
             
             if (!title) return;
             
             try {
+                const taskData = {
+                    title,
+                    description: '',
+                    completed: status === 'completed',
+                    priority,
+                    status
+                };
+                
+                if (goalId) {
+                    taskData.goal_id = parseInt(goalId);
+                }
+                
                 const response = await fetch(`${API_BASE}/tasks`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        title,
-                        description: '',
-                        completed: status === 'completed',
-                        priority,
-                        status
-                    })
+                    body: JSON.stringify(taskData)
                 });
                 
                 if (!response.ok) throw new Error('Failed to create task');
                 
                 document.getElementById('taskTitle').value = '';
                 await fetchTasks();
+                
+                // Refresh goal progress if we have a current goal
+                if (currentGoalId) {
+                    fetchGoalProgress(currentGoalId);
+                }
             } catch (error) {
                 showError('Failed to add task: ' + error.message);
             }
@@ -555,6 +949,11 @@
                 if (!response.ok) throw new Error('Failed to update task');
                 
                 await fetchTasks();
+                
+                // Refresh goal progress if we have a current goal
+                if (currentGoalId) {
+                    fetchGoalProgress(currentGoalId);
+                }
             } catch (error) {
                 showError('Failed to update task: ' + error.message);
             }
@@ -572,6 +971,11 @@
                 if (!response.ok) throw new Error('Failed to delete task');
                 
                 await fetchTasks();
+                
+                // Refresh goal progress if we have a current goal
+                if (currentGoalId) {
+                    fetchGoalProgress(currentGoalId);
+                }
             } catch (error) {
                 showError('Failed to delete task: ' + error.message);
             }
@@ -581,6 +985,7 @@
         addTaskForm.addEventListener('submit', addTask);
         
         // Initial load
+        fetchGoals();
         fetchTasks();
         fetchScore();
         fetchWeekly();

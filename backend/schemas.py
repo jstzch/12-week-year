@@ -4,6 +4,50 @@ from typing import Optional, Annotated
 from pydantic import BaseModel, ConfigDict, computed_field
 
 
+# ==================== Goal Schemas ====================
+
+class GoalBase(BaseModel):
+    """Base goal schema."""
+    name: str
+    start_date: Optional[datetime] = None
+
+
+class GoalCreate(GoalBase):
+    """Schema for creating a goal."""
+    pass
+
+
+class GoalUpdate(BaseModel):
+    """Schema for updating a goal."""
+    name: Optional[str] = None
+    start_date: Optional[datetime] = None
+
+
+class Goal(GoalBase):
+    """Schema for goal response."""
+    id: int
+    week_number: int
+    created_at: datetime
+    updated_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class GoalProgress(BaseModel):
+    """Schema for goal progress."""
+    goal_id: int
+    goal_name: str
+    week_number: int
+    total_tasks: int
+    completed_tasks: int
+    score: float
+    is_excellent: bool
+    
+    model_config = ConfigDict(populate_by_name=True)
+
+
+# ==================== Task Schemas ====================
+
 class TaskBase(BaseModel):
     """Base task schema."""
     title: str
@@ -12,6 +56,7 @@ class TaskBase(BaseModel):
     priority: str = "medium"  # low, medium, high
     due_date: Optional[datetime] = None
     completed: bool = False  # Backward compatibility
+    goal_id: Optional[int] = None
 
 
 class TaskCreate(TaskBase):
@@ -27,6 +72,7 @@ class TaskUpdate(BaseModel):
     priority: Optional[str] = None  # low, medium, high
     due_date: Optional[datetime] = None
     completed: Optional[bool] = None
+    goal_id: Optional[int] = None
 
 
 class Task(TaskBase):

@@ -1,11 +1,102 @@
-"""CRUD operations for Task model."""
+"""CRUD operations for Task and Goal models."""
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from models import Task
-from schemas import TaskCreate, TaskUpdate, TaskStats, ExecutionScore, WeeklyReport
+from models import Task, Goal
+from schemas import TaskCreate, TaskUpdate, TaskStats, ExecutionScore, WeeklyReport, GoalCreate, GoalUpdate, GoalProgress
 
+
+# ==================== Goal CRUD ====================
+
+def calculate_week_number(start_date: datetime) -> int:
+    """Calculate current week number (1-12) from start date."""
+    if start_date is None:
+        return 1
+    now = datetime.utcnow()
+    days_elapsed = (now - start_date).days
+    week = (days_elapsed // 7) + 1
+    return max(1, min(12, week))  # Clamp between 1 and 12
+
+
+def create_goal(db: Session, goal: GoalCreate) -> Goal:
+    """Create a new goal."""
+    start_date = goal.start_date or datetime.utcnow()
+    db_goal = Goal(
+        name=goal.name,
+        start_date=start_date
+    )
+    db.add(db_goal)
+    db.commit()
+    db.refresh(db_goal)
+    return db_goal
+
+
+def get_goals(db: Session, skip: int = 0, limit: int = 100) -> List[Goal]:
+    """Get all goals."""
+    return db.query(Goal).offset(skip).limit(limit).all()
+
+
+def get_goal(db: Session, goal_id: int) -> Optional[Goal]:
+    """Get a single goal by ID."""
+    return db.query(Goal).filter(Goal.id == goal_id).first()
+
+
+def update_goal(db: Session, goal_id: int, goal_update: GoalUpdate) -> Optional[Goal]:
+    """Update a goal."""
+    db_goal = get_goal(db, goal_id)
+    if not db_goal:
+        return None
+    
+    update_data = goal_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_goal, field, value)
+    
+    db_goal.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_goal)
+    return db_goal
+
+
+def delete_goal(db: Session, goal_id: int) -> bool:
+    """Delete a goal and optionally its tasks."""
+    db_goal = get_goal(db, goal_id)
+    if not db_goal:
+        return False
+    
+    # Delete associated tasks first
+    db.query(Task).filter(Task.goal_id == goal_id).delete()
+    
+    db.delete(db_goal)
+    db.commit()
+    return True
+
+
+def get_goal_progress(db: Session, goal_id: int) -> Optional[GoalProgress]:
+    """Get progress for a specific goal."""
+    db_goal = get_goal(db, goal_id)
+    if not db_goal:
+        return None
+    
+    tasks = db.query(Task).filter(Task.goal_id == goal_id).all()
+    total_tasks = len(tasks)
+    completed_tasks = sum(1 for t in tasks if t.status == "completed" or t.completed)
+    
+    score = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0.0
+    week_number = calculate_week_number(db_goal.start_date)
+    
+    return GoalProgress(
+        goal_id=db_goal.id,
+        goal_name=db_goal.name,
+        week_number=week_number,
+        total_tasks=total_tasks,
+        completed_tasks=completed_tasks,
+        score=round(score, 1),
+        is_excellent=score >= 85
+    )
+
+
+# ==================== Task CRUD ====================
 
 def create_task(db: Session, task: TaskCreate) -> Task:
     """Create a new task."""
@@ -20,7 +111,8 @@ def create_task(db: Session, task: TaskCreate) -> Task:
         status=status,
         priority=task.priority,
         due_date=task.due_date,
-        completed=task.completed
+        completed=task.completed,
+        goal_id=task.goal_id
     )
     db.add(db_task)
     db.commit()
@@ -28,9 +120,12 @@ def create_task(db: Session, task: TaskCreate) -> Task:
     return db_task
 
 
-def get_tasks(db: Session, skip: int = 0, limit: int = 100) -> List[Task]:
-    """Get all tasks."""
-    return db.query(Task).offset(skip).limit(limit).all()
+def get_tasks(db: Session, skip: int = 0, limit: int = 100, goal_id: Optional[int] = None) -> List[Task]:
+    """Get all tasks, optionally filtered by goal_id."""
+    query = db.query(Task)
+    if goal_id is not None:
+        query = query.filter(Task.goal_id == goal_id)
+    return query.offset(skip).limit(limit).all()
 
 
 def get_task(db: Session, task_id: int) -> Optional[Task]:
