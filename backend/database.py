@@ -2,14 +2,16 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 # SQLite database file (in-memory for cloud ephemeral filesystem)
 DATABASE_URL = "sqlite:///:memory:"
 
-# Create engine
+# Create engine with StaticPool for in-memory database
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False}  # Needed for SQLite
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool  # Required for in-memory SQLite
 )
 
 # Create session factory
