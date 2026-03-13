@@ -4,14 +4,22 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from models import Task
-from schemas import TaskCreate, TaskUpdate
+from schemas import TaskCreate, TaskUpdate, TaskStats
 
 
 def create_task(db: Session, task: TaskCreate) -> Task:
     """Create a new task."""
+    # Handle backward compatibility: if completed=True, set status to completed
+    status = task.status
+    if task.completed and status == "pending":
+        status = "completed"
+    
     db_task = Task(
         title=task.title,
         description=task.description,
+        status=status,
+        priority=task.priority,
+        due_date=task.due_date,
         completed=task.completed
     )
     db.add(db_task)
@@ -40,6 +48,13 @@ def update_task(db: Session, task_id: int, task_update: TaskUpdate) -> Optional[
     for field, value in update_data.items():
         setattr(db_task, field, value)
     
+    # Sync status with completed for backward compatibility
+    if 'completed' in update_data:
+        if update_data['completed']:
+            db_task.status = "completed"
+        elif db_task.status == "completed":
+            db_task.status = "pending"
+    
     db_task.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(db_task)
@@ -55,3 +70,31 @@ def delete_task(db: Session, task_id: int) -> bool:
     db.delete(db_task)
     db.commit()
     return True
+
+
+def get_task_stats(db: Session) -> TaskStats:
+    """Get task statistics."""
+    all_tasks = db.query(Task).all()
+    
+    total = len(all_tasks)
+    completed = sum(1 for t in all_tasks if t.status == "completed" or t.completed)
+    in_progress = sum(1 for t in all_tasks if t.status == "in_progress")
+    pending = sum(1 for t in all_tasks if t.status == "pending")
+    
+    # Count overdue tasks (not completed and past due_date)
+    now = datetime.utcnow()
+    overdue = sum(
+        1 for t in all_tasks 
+        if t.due_date is not None 
+        and t.status != "completed" 
+        and not t.completed
+        and now > t.due_date
+    )
+    
+    return TaskStats(
+        total=total,
+        completed=completed,
+        in_progress=in_progress,
+        pending=pending,
+        overdue=overdue
+    )
