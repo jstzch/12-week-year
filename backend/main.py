@@ -46,7 +46,9 @@ def hello():
 @app.post("/api/goals", response_model=Goal, status_code=status.HTTP_201_CREATED)
 def create_goal(goal: GoalCreate, db: Session = Depends(get_db)):
     """Create a new goal."""
-    return crud.create_goal(db, goal)
+    db_goal = crud.create_goal(db, goal)
+    db_goal.week_number = crud.calculate_week_number(db_goal.start_date)
+    return db_goal
 
 
 @app.get("/api/goals", response_model=List[Goal])
