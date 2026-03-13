@@ -3,11 +3,587 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>12-Week Year</title>
+    <title>12-Week Year - Task Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: rgba(255,255,255,0.8);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card .value.score {
+            color: #10b981;
+        }
+        
+        /* Main Content */
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        /* Add Task Form */
+        .add-task-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .add-task-form input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .add-task-form input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .add-task-form select {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .add-task-form button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .add-task-form button:hover {
+            background: #5568d3;
+        }
+        
+        /* Task List */
+        .task-list {
+            list-style: none;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+        
+        .task-item:hover {
+            background: #f9f9f9;
+        }
+        
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+        
+        .task-content {
+            flex: 1;
+        }
+        
+        .task-title {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .task-title.completed {
+            text-decoration: line-through;
+            color: #999;
+        }
+        
+        .task-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-in_progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .badge-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-low {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        
+        .badge-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-high {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-complete {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-complete:hover {
+            background: #059669;
+        }
+        
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        /* Error */
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        /* Weekly Report */
+        .weekly-report {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .weekly-report h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .report-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .report-stat {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .report-stat .label {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .report-stat .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
-    <h1>12-Week Year</h1>
-    <p>Goal tracking app - coming soon!</p>
-    <p><a href="https://jstzch.github.io/12-week-year/">Visit our App</a></p>
+    <div class="container">
+        <h1>📅 12-Week Year</h1>
+        <p class="subtitle">Track your goals and measure your progress</p>
+        
+        <!-- Stats Section -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Tasks</h3>
+                <div class="value" id="totalTasks">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Completed</h3>
+                <div class="value" id="completedTasks">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Execution Score</h3>
+                <div class="value score" id="executionScore">--</div>
+            </div>
+            <div class="stat-card">
+                <h3>Week Progress</h3>
+                <div class="value" id="weekProgress">0%</div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div id="errorMessage" class="error" style="display: none;"></div>
+            
+            <!-- Add Task Form -->
+            <form class="add-task-form" id="addTaskForm">
+                <input type="text" id="taskTitle" placeholder="Enter task title..." required>
+                <select id="taskPriority">
+                    <option value="low">Low Priority</option>
+                    <option value="medium" selected>Medium Priority</option>
+                    <option value="high">High Priority</option>
+                </select>
+                <select id="taskStatus">
+                    <option value="pending">Pending</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+                <button type="submit">Add Task</button>
+            </form>
+            
+            <!-- Task List -->
+            <ul class="task-list" id="taskList">
+                <li class="loading">Loading tasks...</li>
+            </ul>
+            
+            <!-- Weekly Report -->
+            <div class="weekly-report" id="weeklyReport" style="display: none;">
+                <h3>📊 Weekly Report</h3>
+                <div class="report-stats" id="reportStats"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        
+        // State
+        let tasks = [];
+        
+        // DOM Elements
+        const taskList = document.getElementById('taskList');
+        const addTaskForm = document.getElementById('addTaskForm');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        // Show error
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Fetch all tasks
+        async function fetchTasks() {
+            try {
+                const response = await fetch(`${API_BASE}/tasks`);
+                if (!response.ok) throw new Error('Failed to fetch tasks');
+                tasks = await response.json();
+                renderTasks();
+                updateStats();
+            } catch (error) {
+                console.error('Error fetching tasks:', error);
+                taskList.innerHTML = `<li class="empty-state"><p>Unable to connect to server. Make sure the backend is running on port 8000.</p></li>`;
+            }
+        }
+        
+        // Fetch score (may not exist in backend yet)
+        async function fetchScore() {
+            try {
+                const response = await fetch(`${API_BASE}/score`);
+                if (!response.ok) throw new Error('Score endpoint not available');
+                const data = await response.json();
+                document.getElementById('executionScore').textContent = data.score || '--';
+            } catch (error) {
+                // Score endpoint not implemented yet
+                document.getElementById('executionScore').textContent = '--';
+            }
+        }
+        
+        // Fetch weekly report (may not exist in backend yet)
+        async function fetchWeekly() {
+            try {
+                const response = await fetch(`${API_BASE}/weekly`);
+                if (!response.ok) throw new Error('Weekly endpoint not available');
+                const data = await response.json();
+                renderWeeklyReport(data);
+            } catch (error) {
+                // Weekly endpoint not implemented yet
+                document.getElementById('weeklyReport').style.display = 'none';
+            }
+        }
+        
+        // Render weekly report
+        function renderWeeklyReport(data) {
+            const weeklyReport = document.getElementById('weeklyReport');
+            const reportStats = document.getElementById('reportStats');
+            
+            weeklyReport.style.display = 'block';
+            reportStats.innerHTML = `
+                <div class="report-stat">
+                    <div class="label">Tasks This Week</div>
+                    <div class="value">${data.tasksThisWeek || 0}</div>
+                </div>
+                <div class="report-stat">
+                    <div class="label">Completed This Week</div>
+                    <div class="value">${data.completedThisWeek || 0}</div>
+                </div>
+                <div class="report-stat">
+                    <div class="label">Completion Rate</div>
+                    <div class="value">${data.completionRate || 0}%</div>
+                </div>
+                <div class="report-stat">
+                    <div class="label">Streak</div>
+                    <div class="value">${data.streak || 0} days</div>
+                </div>
+            `;
+        }
+        
+        // Update stats
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const score = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            document.getElementById('totalTasks').textContent = total;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('weekProgress').textContent = `${score}%`;
+        }
+        
+        // Render tasks
+        function renderTasks() {
+            if (tasks.length === 0) {
+                taskList.innerHTML = `
+                    <li class="empty-state">
+                        <p>No tasks yet. Add your first task above! 🎯</p>
+                    </li>
+                `;
+                return;
+            }
+            
+            taskList.innerHTML = tasks.map(task => `
+                <li class="task-item" data-id="${task.id}">
+                    <input type="checkbox" class="task-checkbox" 
+                        ${task.completed ? 'checked' : ''} 
+                        onchange="toggleComplete(${task.id}, this.checked)">
+                    <div class="task-content">
+                        <div class="task-title ${task.completed ? 'completed' : ''}">${escapeHtml(task.title)}</div>
+                        <div class="task-meta">
+                            <span class="badge badge-${task.status || 'pending'}">${task.status || 'pending'}</span>
+                            <span class="badge badge-${task.priority || 'medium'}">${task.priority || 'medium'}</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-complete" onclick="toggleComplete(${task.id}, ${!task.completed})">
+                            ${task.completed ? '↩️ Undo' : '✅ Complete'}
+                        </button>
+                        <button class="btn btn-delete" onclick="deleteTask(${task.id})">🗑️ Delete</button>
+                    </div>
+                </li>
+            `).join('');
+        }
+        
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Add new task
+        async function addTask(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('taskTitle').value.trim();
+            const priority = document.getElementById('taskPriority').value;
+            const status = document.getElementById('taskStatus').value;
+            
+            if (!title) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/tasks`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description: '',
+                        completed: status === 'completed',
+                        priority,
+                        status
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to create task');
+                
+                document.getElementById('taskTitle').value = '';
+                await fetchTasks();
+            } catch (error) {
+                showError('Failed to add task: ' + error.message);
+            }
+        }
+        
+        // Toggle task completion
+        async function toggleComplete(taskId, completed) {
+            try {
+                const task = tasks.find(t => t.id === taskId);
+                if (!task) return;
+                
+                const response = await fetch(`${API_BASE}/tasks/${taskId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        completed,
+                        status: completed ? 'completed' : 'pending'
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to update task');
+                
+                await fetchTasks();
+            } catch (error) {
+                showError('Failed to update task: ' + error.message);
+            }
+        }
+        
+        // Delete task
+        async function deleteTask(taskId) {
+            if (!confirm('Are you sure you want to delete this task?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/tasks/${taskId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Failed to delete task');
+                
+                await fetchTasks();
+            } catch (error) {
+                showError('Failed to delete task: ' + error.message);
+            }
+        }
+        
+        // Event listeners
+        addTaskForm.addEventListener('submit', addTask);
+        
+        // Initial load
+        fetchTasks();
+        fetchScore();
+        fetchWeekly();
+    </script>
 </body>
 </html>
