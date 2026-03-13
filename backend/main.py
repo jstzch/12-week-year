@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db, init_db
 from models import Task
-from schemas import Task, TaskCreate, TaskUpdate, TaskStats
+from schemas import Task, TaskCreate, TaskUpdate, TaskStats, ExecutionScore, WeeklyReport
 import crud
 
 app = FastAPI()
@@ -73,3 +73,15 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
     success = crud.delete_task(db, task_id)
     if not success:
         raise HTTPException(status_code=404, detail="Task not found")
+
+
+@app.get("/api/score", response_model=ExecutionScore)
+def get_execution_score(db: Session = Depends(get_db)):
+    """Get execution score."""
+    return crud.get_execution_score(db)
+
+
+@app.get("/api/weekly", response_model=WeeklyReport)
+def get_weekly_report(db: Session = Depends(get_db)):
+    """Get weekly report."""
+    return crud.get_weekly_report(db)

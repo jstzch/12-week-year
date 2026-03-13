@@ -55,3 +55,18 @@ class TaskStats(BaseModel):
     in_progress: int
     pending: int
     overdue: int
+
+
+class ExecutionScore(BaseModel):
+    """Schema for execution score."""
+    score: float
+    completed: int
+    total: int
+    is_excellent: bool
+
+
+class WeeklyReport(BaseModel):
+    """Schema for weekly report."""
+    tasks_this_week: int
+    completed_this_week: int
+    completion_rate: float
