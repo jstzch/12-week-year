@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db, init_db
 from models import Task
-from schemas import Task, TaskCreate, TaskUpdate
+from schemas import Task, TaskCreate, TaskUpdate, TaskStats
 import crud
 
 app = FastAPI()
@@ -41,6 +41,12 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db)):
 def read_tasks(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """Get all tasks."""
     return crud.get_tasks(db, skip=skip, limit=limit)
+
+
+@app.get("/api/tasks/stats", response_model=TaskStats)
+def get_task_stats(db: Session = Depends(get_db)):
+    """Get task statistics."""
+    return crud.get_task_stats(db)
 
 
 @app.get("/api/tasks/{task_id}", response_model=Task)

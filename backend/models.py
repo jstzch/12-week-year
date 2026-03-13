@@ -11,6 +11,9 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    completed = Column(Boolean, default=False)
+    status = Column(String, default="pending")  # pending, in_progress, completed
+    priority = Column(String, default="medium")  # low, medium, high
+    due_date = Column(DateTime, nullable=True)
+    completed = Column(Boolean, default=False)  # Backward compatibility
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
