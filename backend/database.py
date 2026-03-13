@@ -3,8 +3,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# SQLite database file
-DATABASE_URL = "sqlite:///12weekyear.db"
+# SQLite database file (in-memory for cloud ephemeral filesystem)
+DATABASE_URL = "sqlite:///:memory:"
 
 # Create engine
 engine = create_engine(
