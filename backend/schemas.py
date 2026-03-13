@@ -63,6 +63,8 @@ class ExecutionScore(BaseModel):
     completed: int
     total: int
     is_excellent: bool
+    
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class WeeklyReport(BaseModel):
@@ -70,3 +72,5 @@ class WeeklyReport(BaseModel):
     tasks_this_week: int
     completed_this_week: int
     completion_rate: float
+    
+    model_config = ConfigDict(populate_by_name=True)
