@@ -121,9 +121,10 @@ def get_weekly_report(db: Session) -> WeeklyReport:
     """Get weekly report."""
     now = datetime.utcnow()
     # Get start of week (Monday)
-    week_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    from datetime import timedelta
     days_since_monday = now.weekday()
-    week_start = week_start.replace(day=now.day - days_since_monday)
+    week_start = now - timedelta(days=days_since_monday)
+    week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
     
     # Get tasks created this week
     tasks_this_week = db.query(Task).filter(
