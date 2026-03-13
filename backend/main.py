@@ -1,6 +1,7 @@
 """12-Week Year - Backend API"""
 from typing import List
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from database import get_db, init_db
@@ -9,6 +10,16 @@ from schemas import Task, TaskCreate, TaskUpdate, TaskStats, ExecutionScore, Wee
 import crud
 
 app = FastAPI()
+
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event("startup")
