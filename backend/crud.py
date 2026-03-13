@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 
 from models import Task
-from schemas import TaskCreate, TaskUpdate, TaskStats
+from schemas import TaskCreate, TaskUpdate, TaskStats, ExecutionScore, WeeklyReport
 
 
 def create_task(db: Session, task: TaskCreate) -> Task:
@@ -97,4 +97,49 @@ def get_task_stats(db: Session) -> TaskStats:
         in_progress=in_progress,
         pending=pending,
         overdue=overdue
+    )
+
+
+def get_execution_score(db: Session) -> ExecutionScore:
+    """Get execution score (completed/total * 100%)."""
+    all_tasks = db.query(Task).all()
+    
+    total = len(all_tasks)
+    completed = sum(1 for t in all_tasks if t.status == "completed" or t.completed)
+    
+    score = (completed / total * 100) if total > 0 else 0.0
+    
+    return ExecutionScore(
+        score=round(score, 1),
+        completed=completed,
+        total=total,
+        is_excellent=score >= 85
+    )
+
+
+def get_weekly_report(db: Session) -> WeeklyReport:
+    """Get weekly report."""
+    now = datetime.utcnow()
+    # Get start of week (Monday)
+    week_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    days_since_monday = now.weekday()
+    week_start = week_start.replace(day=now.day - days_since_monday)
+    
+    # Get tasks created this week
+    tasks_this_week = db.query(Task).filter(
+        Task.created_at >= week_start
+    ).count()
+    
+    # Get tasks completed this week
+    completed_this_week = db.query(Task).filter(
+        Task.updated_at >= week_start,
+        (Task.status == "completed") | (Task.completed == True)
+    ).count()
+    
+    completion_rate = (completed_this_week / tasks_this_week * 100) if tasks_this_week > 0 else 0.0
+    
+    return WeeklyReport(
+        tasks_this_week=tasks_this_week,
+        completed_this_week=completed_this_week,
+        completion_rate=round(completion_rate, 1)
     )
