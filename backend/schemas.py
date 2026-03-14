@@ -120,3 +120,37 @@ class WeeklyReport(BaseModel):
     completion_rate: float
     
     model_config = ConfigDict(populate_by_name=True)
+
+
+# ==================== WAM Schemas ====================
+
+class WAMBase(BaseModel):
+    """Base WAM schema."""
+    goal_id: Optional[int] = None
+    week_number: int
+    execution_score: int  # 0-100
+    notes: Optional[str] = None
+    plan_next: Optional[str] = None
+
+
+class WAMCreate(WAMBase):
+    """Schema for creating a WAM."""
+    pass
+
+
+class WAMUpdate(BaseModel):
+    """Schema for updating a WAM."""
+    goal_id: Optional[int] = None
+    week_number: Optional[int] = None
+    execution_score: Optional[int] = None
+    notes: Optional[str] = None
+    plan_next: Optional[str] = None
+
+
+class WAM(WAMBase):
+    """Schema for WAM response."""
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)

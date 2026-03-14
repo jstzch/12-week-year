@@ -3,8 +3,9 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 
-from models import Task, Goal
+from models import Task, Goal, WAM
 from schemas import TaskCreate, TaskUpdate, TaskStats, ExecutionScore, WeeklyReport, GoalCreate, GoalUpdate, GoalProgress
+from schemas import WAMCreate, WAMUpdate
 
 
 # ==================== Goal CRUD ====================
@@ -239,3 +240,65 @@ def get_weekly_report(db: Session) -> WeeklyReport:
         completed_this_week=completed_this_week,
         completion_rate=round(completion_rate, 1)
     )
+
+
+# ==================== WAM CRUD ====================
+
+def create_wam(db: Session, wam: WAMCreate) -> WAM:
+    """Create a new WAM record."""
+    db_wam = WAM(
+        goal_id=wam.goal_id,
+        week_number=wam.week_number,
+        execution_score=wam.execution_score,
+        notes=wam.notes,
+        plan_next=wam.plan_next
+    )
+    db.add(db_wam)
+    db.commit()
+    db.refresh(db_wam)
+    return db_wam
+
+
+def get_wams(db: Session, skip: int = 0, limit: int = 100, goal_id: Optional[int] = None) -> List[WAM]:
+    """Get all WAMs, optionally filtered by goal_id."""
+    query = db.query(WAM)
+    if goal_id is not None:
+        query = query.filter(WAM.goal_id == goal_id)
+    return query.order_by(WAM.week_number.desc()).offset(skip).limit(limit).all()
+
+
+def get_wam(db: Session, wam_id: int) -> Optional[WAM]:
+    """Get a single WAM by ID."""
+    return db.query(WAM).filter(WAM.id == wam_id).first()
+
+
+def update_wam(db: Session, wam_id: int, wam_update: WAMUpdate) -> Optional[WAM]:
+    """Update a WAM."""
+    db_wam = get_wam(db, wam_id)
+    if not db_wam:
+        return None
+    
+    update_data = wam_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_wam, field, value)
+    
+    db_wam.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(db_wam)
+    return db_wam
+
+
+def delete_wam(db: Session, wam_id: int) -> bool:
+    """Delete a WAM."""
+    db_wam = get_wam(db, wam_id)
+    if not db_wam:
+        return False
+    
+    db.delete(db_wam)
+    db.commit()
+    return True
+
+
+def get_wams_by_goal(db: Session, goal_id: int) -> List[WAM]:
+    """Get all WAMs for a specific goal."""
+    return db.query(WAM).filter(WAM.goal_id == goal_id).order_by(WAM.week_number.desc()).all()

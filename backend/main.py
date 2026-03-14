@@ -5,9 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from database import get_db, init_db
-from models import Task
+from models import Task, WAM
 from schemas import Task, TaskCreate, TaskUpdate, TaskStats, ExecutionScore, WeeklyReport
 from schemas import Goal, GoalCreate, GoalUpdate, GoalProgress
+from schemas import WAM, WAMCreate, WAMUpdate
 import crud
 
 app = FastAPI()
@@ -156,3 +157,43 @@ def get_execution_score(db: Session = Depends(get_db)):
 def get_weekly_report(db: Session = Depends(get_db)):
     """Get weekly report."""
     return crud.get_weekly_report(db)
+
+
+# ==================== WAM Endpoints ====================
+
+@app.post("/api/wams", response_model=WAM, status_code=status.HTTP_201_CREATED)
+def create_wam(wam: WAMCreate, db: Session = Depends(get_db)):
+    """Create a new WAM record."""
+    return crud.create_wam(db, wam)
+
+
+@app.get("/api/wams", response_model=List[WAM])
+def read_wams(skip: int = 0, limit: int = 100, goal_id: Optional[int] = None, db: Session = Depends(get_db)):
+    """Get all WAMs, optionally filtered by goal_id."""
+    return crud.get_wams(db, skip=skip, limit=limit, goal_id=goal_id)
+
+
+@app.get("/api/wams/{wam_id}", response_model=WAM)
+def read_wam(wam_id: int, db: Session = Depends(get_db)):
+    """Get a single WAM by ID."""
+    db_wam = crud.get_wam(db, wam_id)
+    if db_wam is None:
+        raise HTTPException(status_code=404, detail="WAM not found")
+    return db_wam
+
+
+@app.put("/api/wams/{wam_id}", response_model=WAM)
+def update_wam(wam_id: int, wam_update: WAMUpdate, db: Session = Depends(get_db)):
+    """Update a WAM."""
+    db_wam = crud.update_wam(db, wam_id, wam_update)
+    if db_wam is None:
+        raise HTTPException(status_code=404, detail="WAM not found")
+    return db_wam
+
+
+@app.delete("/api/wams/{wam_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_wam(wam_id: int, db: Session = Depends(get_db)):
+    """Delete a WAM."""
+    success = crud.delete_wam(db, wam_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="WAM not found")
