@@ -9,7 +9,8 @@ from models import Task, WAM
 from schemas import Task, TaskCreate, TaskUpdate, TaskStats, ExecutionScore, WeeklyReport
 from schemas import Goal, GoalCreate, GoalUpdate, GoalProgress
 from schemas import WAM, WAMCreate, WAMUpdate
-from schemas import ScoreHistoryResponse
+from schemas import ScoreHistoryResponse, WeeklyPlanUpdate, WeeklyProgress, IndicatorStats, DashboardResponse
+from schemas import DashboardResponse
 import crud
 
 app = FastAPI()
@@ -41,6 +42,14 @@ def root():
 def hello():
     """Hello endpoint"""
     return {"message": "Hello, World!"}
+
+
+# ==================== Dashboard Endpoints ====================
+
+@app.get("/api/dashboard", response_model=DashboardResponse)
+def get_dashboard(db: Session = Depends(get_db)):
+    """Get dashboard data with all goals and statistics."""
+    return crud.get_dashboard(db)
 
 
 # ==================== Goal Endpoints ====================
@@ -109,6 +118,25 @@ def get_goal_scores(goal_id: int, db: Session = Depends(get_db)):
     return scores
 
 
+@app.put("/api/goals/{goal_id}/weekly-plan", response_model=Goal)
+def update_weekly_plan(goal_id: int, plan_update: WeeklyPlanUpdate, db: Session = Depends(get_db)):
+    """Set weekly plan for a goal."""
+    db_goal = crud.update_weekly_plan(db, goal_id, plan_update.weekly_plan)
+    if db_goal is None:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    db_goal.week_number = crud.calculate_week_number(db_goal.start_date)
+    return db_goal
+
+
+@app.get("/api/goals/{goal_id}/weekly-progress", response_model=WeeklyProgress)
+def get_weekly_progress(goal_id: int, db: Session = Depends(get_db)):
+    """Get weekly progress for a specific goal."""
+    progress = crud.get_weekly_progress(db, goal_id)
+    if progress is None:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return progress
+
+
 # ==================== Task Endpoints ====================
 
 @app.post("/api/tasks", response_model=Task, status_code=status.HTTP_201_CREATED)
@@ -167,6 +195,21 @@ def get_execution_score(db: Session = Depends(get_db)):
 def get_weekly_report(db: Session = Depends(get_db)):
     """Get weekly report."""
     return crud.get_weekly_report(db)
+
+
+@app.get("/api/indicators", response_model=IndicatorStats)
+def get_indicator_stats(db: Session = Depends(get_db)):
+    """Get lead/lag indicator statistics."""
+    return crud.get_indicator_stats(db)
+
+
+@app.get("/api/goals/{goal_id}/indicators", response_model=IndicatorStats)
+def get_goal_indicator_stats(goal_id: int, db: Session = Depends(get_db)):
+    """Get lead/lag indicator statistics for a specific goal."""
+    stats = crud.get_indicator_stats_by_goal(db, goal_id)
+    if stats is None:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return stats
 
 
 # ==================== WAM Endpoints ====================

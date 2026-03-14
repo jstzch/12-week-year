@@ -12,6 +12,8 @@ class Goal(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     start_date = Column(DateTime, default=datetime.utcnow)
+    # Weekly plan: number of tasks planned for the current week
+    weekly_plan = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -33,6 +35,8 @@ class Task(Base):
     due_date = Column(DateTime, nullable=True)
     completed = Column(Boolean, default=False)  # Backward compatibility
     goal_id = Column(Integer, ForeignKey("goals.id"), nullable=True)
+    # Lead/Lag indicator: "lead" = controllable action, "lag" = result
+    indicator_type = Column(String, default="lead")  # "lead" | "lag"
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     

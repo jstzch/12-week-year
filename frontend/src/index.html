@@ -143,6 +143,21 @@
             opacity: 0.9;
         }
         
+        .weekly-plan-section {
+            display: flex;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+        }
+        
+        .stat-sub {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+        
         /* Modal */
         .modal-overlay {
             display: none;
@@ -508,6 +523,16 @@
             color: #dc2626;
         }
         
+        .badge-lead {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .badge-lag {
+            background: #fce7f3;
+            color: #db2777;
+        }
+        
         .task-actions {
             display: flex;
             gap: 8px;
@@ -700,6 +725,16 @@
                 <span id="progressTasks">0/0 tasks</span>
                 <span id="progressScore">Score: 0%</span>
             </div>
+            <div class="weekly-plan-section">
+                <label for="weeklyPlanInput">📅 Weekly Plan:</label>
+                <input type="number" id="weeklyPlanInput" min="0" max="50" value="0" style="width: 60px; padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd;">
+                <span>tasks</span>
+                <button onclick="updateWeeklyPlan()" style="margin-left: 10px; padding: 4px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">Set</button>
+            </div>
+            <div class="weekly-progress-stats" id="weeklyProgressStats" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; display: none;">
+                <span id="weeklyPlanProgress">This week: 0/0 completed</span>
+                <span id="weeklyPlanRate" style="margin-left: 15px;">Rate: 0%</span>
+            </div>
         </div>
         
         <!-- Score Chart -->
@@ -736,6 +771,16 @@
                 <h3>Week Progress</h3>
                 <div class="value" id="weekProgress">0%</div>
             </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
+                <h3>📍 Lead (Actions)</h3>
+                <div class="value" id="leadStats">0/0</div>
+                <div class="stat-sub" id="leadRate">0%</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);">
+                <h3>🎯 Lag (Results)</h3>
+                <div class="value" id="lagStats">0/0</div>
+                <div class="stat-sub" id="lagRate">0%</div>
+            </div>
         </div>
         
         <!-- Main Content -->
@@ -757,6 +802,10 @@
                     <option value="pending">Pending</option>
                     <option value="in_progress">In Progress</option>
                     <option value="completed">Completed</option>
+                </select>
+                <select id="taskIndicator">
+                    <option value="lead" title="Controllable action">📍 Lead (Action)</option>
+                    <option value="lag" title="Result outcome">🎯 Lag (Result)</option>
                 </select>
                 <button type="submit">Add Task</button>
             </form>
@@ -1099,6 +1148,9 @@
                 if (!response.ok) throw new Error('Failed to fetch progress');
                 const data = await response.json();
                 renderGoalProgress(data);
+                
+                // Also fetch weekly progress
+                await fetchWeeklyProgress(goalId);
             } catch (error) {
                 console.error('Error fetching goal progress:', error);
                 document.getElementById('goalProgress').style.display = 'none';
@@ -1117,6 +1169,51 @@
                 `${data.completed_tasks}/${data.total_tasks} tasks`;
             document.getElementById('progressScore').textContent = 
                 `Score: ${data.score}%`;
+        }
+        
+        // Update weekly plan
+        async function updateWeeklyPlan() {
+            if (!currentGoalId) return;
+            
+            const weeklyPlan = parseInt(document.getElementById('weeklyPlanInput').value) || 0;
+            
+            try {
+                const response = await fetch(`${API_BASE}/goals/${currentGoalId}/weekly-plan`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ weekly_plan: weeklyPlan })
+                });
+                
+                if (!response.ok) throw new Error('Failed to update weekly plan');
+                
+                // Fetch and display weekly progress
+                await fetchWeeklyProgress(currentGoalId);
+            } catch (error) {
+                console.error('Error updating weekly plan:', error);
+            }
+        }
+        
+        // Fetch weekly progress
+        async function fetchWeeklyProgress(goalId) {
+            try {
+                const response = await fetch(`${API_BASE}/goals/${goalId}/weekly-progress`);
+                if (!response.ok) throw new Error('Failed to fetch weekly progress');
+                const data = await response.json();
+                
+                // Update weekly plan input
+                document.getElementById('weeklyPlanInput').value = data.weekly_plan;
+                
+                // Show weekly progress stats
+                const weeklyProgressStats = document.getElementById('weeklyProgressStats');
+                weeklyProgressStats.style.display = 'block';
+                
+                document.getElementById('weeklyPlanProgress').textContent = 
+                    `This week: ${data.completed_this_week}/${data.weekly_plan} completed`;
+                document.getElementById('weeklyPlanRate').textContent = 
+                    `Rate: ${data.completion_rate}%`;
+            } catch (error) {
+                console.error('Error fetching weekly progress:', error);
+            }
         }
         
         // Fetch all tasks (optionally filtered by goal)
@@ -1198,6 +1295,17 @@
             document.getElementById('totalTasks').textContent = total;
             document.getElementById('completedTasks').textContent = completed;
             document.getElementById('weekProgress').textContent = `${score}%`;
+            
+            // Update lead/lag stats
+            const leadTasks = tasks.filter(t => t.indicator_type === 'lead' || !t.indicator_type);
+            const lagTasks = tasks.filter(t => t.indicator_type === 'lag');
+            const leadCompleted = leadTasks.filter(t => t.completed).length;
+            const lagCompleted = lagTasks.filter(t => t.completed).length;
+            
+            document.getElementById('leadStats').textContent = `${leadCompleted}/${leadTasks.length}`;
+            document.getElementById('leadRate').textContent = leadTasks.length > 0 ? `${Math.round((leadCompleted/leadTasks.length)*100)}%` : '0%';
+            document.getElementById('lagStats').textContent = `${lagCompleted}/${lagTasks.length}`;
+            document.getElementById('lagRate').textContent = lagTasks.length > 0 ? `${Math.round((lagCompleted/lagTasks.length)*100)}%` : '0%';
         }
         
         // Get goal name by ID
@@ -1229,6 +1337,7 @@
                             ${task.goal_id ? `<span class="task-goal-badge">${escapeHtml(getGoalName(task.goal_id))}</span>` : ''}
                             <span class="badge badge-${task.status || 'pending'}">${task.status || 'pending'}</span>
                             <span class="badge badge-${task.priority || 'medium'}">${task.priority || 'medium'}</span>
+                            <span class="badge badge-${task.indicator_type === 'lead' ? 'lead' : 'lag'}">${task.indicator_type === 'lead' ? '📍 Lead' : '🎯 Lag'}</span>
                         </div>
                     </div>
                     <div class="task-actions">
@@ -1256,6 +1365,7 @@
             const goalId = document.getElementById('taskGoal').value;
             const priority = document.getElementById('taskPriority').value;
             const status = document.getElementById('taskStatus').value;
+            const indicatorType = document.getElementById('taskIndicator').value;
             
             if (!title) return;
             
@@ -1265,7 +1375,8 @@
                     description: '',
                     completed: status === 'completed',
                     priority,
-                    status
+                    status,
+                    indicator_type: indicatorType
                 };
                 
                 if (goalId) {

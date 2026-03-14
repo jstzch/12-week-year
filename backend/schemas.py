@@ -10,6 +10,7 @@ class GoalBase(BaseModel):
     """Base goal schema."""
     name: str
     start_date: Optional[datetime] = None
+    weekly_plan: Optional[int] = 0  # Weekly planned tasks
 
 
 class GoalCreate(GoalBase):
@@ -75,6 +76,7 @@ class TaskBase(BaseModel):
     due_date: Optional[datetime] = None
     completed: bool = False  # Backward compatibility
     goal_id: Optional[int] = None
+    indicator_type: str = "lead"  # "lead" = controllable action, "lag" = result
 
 
 class TaskCreate(TaskBase):
@@ -140,6 +142,35 @@ class WeeklyReport(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
+class WeeklyPlanUpdate(BaseModel):
+    """Schema for updating weekly plan."""
+    weekly_plan: int
+
+
+class WeeklyProgress(BaseModel):
+    """Schema for weekly progress."""
+    goal_id: int
+    goal_name: str
+    week_number: int
+    weekly_plan: int  # Planned number of tasks for this week
+    completed_this_week: int  # Actual completed tasks this week
+    completion_rate: float  # Completion rate (actual / plan * 100)
+    
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class IndicatorStats(BaseModel):
+    """Schema for lead/lag indicator statistics."""
+    lead_total: int
+    lead_completed: int
+    lead_completion_rate: float
+    lag_total: int
+    lag_completed: int
+    lag_completion_rate: float
+    
+    model_config = ConfigDict(populate_by_name=True)
+
+
 # ==================== WAM Schemas ====================
 
 class WAMBase(BaseModel):
@@ -172,3 +203,37 @@ class WAM(WAMBase):
     updated_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
+
+
+# ==================== Dashboard Schemas ====================
+
+class GoalCard(BaseModel):
+    """Schema for goal card in dashboard."""
+    id: int
+    name: str
+    week_number: int
+    total_tasks: int
+    completed_tasks: int
+    score: float
+    is_excellent: bool
+    
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class DashboardStats(BaseModel):
+    """Schema for dashboard statistics."""
+    total_goals: int
+    leading_indicator_tasks: int
+    lagging_indicator_tasks: int
+    weekly_execution_score: float
+    is_excellent: bool
+    
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class DashboardResponse(BaseModel):
+    """Schema for dashboard response."""
+    stats: DashboardStats
+    goals: List[GoalCard]
+    
+    model_config = ConfigDict(populate_by_name=True)
