@@ -11,6 +11,9 @@
 | v0.3 | 任务管理 API | 2-3 个 |
 | v0.4 | 执行分数计算 | 2 个 |
 | v0.5 | 基础前端 | 3-4 个 |
+| v0.6 | 目标管理（多标签页） | 3-4 个 |
+| v0.7 | WAM 会议记录 | 3-4 个 |
+| v0.8 | 执行分数趋势图表 | 2-3 个 |
 
 ### 每个提交的检验标准
 
@@ -25,22 +28,3 @@
 2. **AI Agent** → 写代码 + 测试
 3. **另一个 Agent** → Code Review
 4. **人类** → 确认合并
-
----
-
-## v0.1 目标：搭建项目骨架，有一个可运行的 Hello API
-
-### 目录结构
-
-```
-12-week-year/
-├── backend/
-│   ├── main.py          # FastAPI 入口
-│   ├── tests/           # 测试
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   └── package.json
-├── docker-compose.yml
-└── README.md
-```
