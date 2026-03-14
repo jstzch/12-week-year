@@ -214,6 +214,123 @@
             font-size: 0.95rem;
         }
         
+        /* Form Group */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+        
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .score-slider {
+            margin-top: 10px;
+        }
+        
+        .score-slider input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .score-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        /* WAM History */
+        .wam-history {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 20px;
+        }
+        
+        .wam-history h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .wam-item {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .wam-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .wam-item-week {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .wam-item-score {
+            background: #10b981;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .wam-item-score.low {
+            background: #ef4444;
+        }
+        
+        .wam-item-score.medium {
+            background: #f59e0b;
+        }
+        
+        .wam-item-notes,
+        .wam-item-plan {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .wam-item-plan {
+            color: #8b5cf6;
+        }
+        
+        .wam-item-delete {
+            margin-left: 10px;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        }
+        
         .modal .btn-submit:hover {
             background: #5568d3;
         }
@@ -521,6 +638,7 @@
         <!-- Goal Tabs -->
         <div class="goal-tabs" id="goalTabs">
             <button class="btn-new-goal" onclick="showNewGoalModal()">+ New Goal</button>
+            <button class="btn-new-goal" style="background: #8b5cf6;" onclick="showWAMModal()">📋 WAM</button>
         </div>
         
         <!-- Goal Progress -->
@@ -605,6 +723,53 @@
                     <button type="submit" class="btn-submit">Create Goal</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- WAM Modal -->
+    <div class="modal-overlay" id="wamModal">
+        <div class="modal" style="max-width: 600px;">
+            <h2>📋 Weekly Accountability Meeting</h2>
+            <p style="color: #666; margin-bottom: 20px;">Review your progress and plan for the next week</p>
+            
+            <!-- WAM Form -->
+            <form onsubmit="createWAM(event)" id="wamForm">
+                <div class="form-group">
+                    <label for="wamGoal">Goal (Optional)</label>
+                    <select id="wamGoal">
+                        <option value="">All Goals</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="wamWeek">Week Number</label>
+                    <input type="number" id="wamWeek" min="1" max="12" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="wamScore">Execution Score (0-100)</label>
+                    <input type="number" id="wamScore" min="0" max="100" value="0" required>
+                    <div class="score-slider">
+                        <input type="range" id="wamScoreSlider" min="0" max="100" value="0" oninput="document.getElementById('wamScore').value = this.value">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="wamNotes">Meeting Notes</label>
+                    <textarea id="wamNotes" placeholder="What happened this week? What worked? What didn't?" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="wamPlan">Next Week Plan</label>
+                    <textarea id="wamPlan" placeholder="What will you focus on next week?" rows="3"></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn-cancel" onclick="hideWAMModal()">Cancel</button>
+                    <button type="submit" class="btn-submit">Save WAM</button>
+                </div>
+            </form>
+            
+            <!-- WAM History -->
+            <div class="wam-history" id="wamHistory" style="margin-top: 30px;">
+                <h3>📜 WAM History</h3>
+                <div id="wamHistoryList"></div>
+            </div>
         </div>
     </div>
 
@@ -979,6 +1144,141 @@
             } catch (error) {
                 showError('Failed to delete task: ' + error.message);
             }
+        }
+        
+        // ==================== WAM Functions ====================
+        
+        let wams = [];
+        
+        function showWAMModal() {
+            document.getElementById('wamModal').classList.add('active');
+            populateWAMGoalSelect();
+            fetchWAMs();
+            // Set default week number
+            const weekNumber = Math.min(12, Math.max(1, Math.ceil((new Date() - new Date(new Date().getFullYear(), 0, 1)) / (7 * 24 * 60 * 60 * 1000))));
+            document.getElementById('wamWeek').value = weekNumber;
+            document.getElementById('wamScore').value = 0;
+            document.getElementById('wamScoreSlider').value = 0;
+            document.getElementById('wamNotes').value = '';
+            document.getElementById('wamPlan').value = '';
+        }
+        
+        function hideWAMModal() {
+            document.getElementById('wamModal').classList.remove('active');
+        }
+        
+        function populateWAMGoalSelect() {
+            const select = document.getElementById('wamGoal');
+            select.innerHTML = '<option value="">All Goals</option>';
+            goals.forEach(goal => {
+                const option = document.createElement('option');
+                option.value = goal.id;
+                option.textContent = goal.name;
+                select.appendChild(option);
+            });
+        }
+        
+        async function createWAM(event) {
+            event.preventDefault();
+            
+            const goalId = document.getElementById('wamGoal').value;
+            const weekNumber = parseInt(document.getElementById('wamWeek').value);
+            const executionScore = parseInt(document.getElementById('wamScore').value);
+            const notes = document.getElementById('wamNotes').value.trim();
+            const planNext = document.getElementById('wamPlan').value.trim();
+            
+            try {
+                const response = await fetch(`${API_BASE}/wams`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        goal_id: goalId ? parseInt(goalId) : null,
+                        week_number: weekNumber,
+                        execution_score: executionScore,
+                        notes: notes || null,
+                        plan_next: planNext || null
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to create WAM');
+                
+                // Clear form and refresh list
+                document.getElementById('wamNotes').value = '';
+                document.getElementById('wamPlan').value = '';
+                document.getElementById('wamScore').value = 0;
+                document.getElementById('wamScoreSlider').value = 0;
+                
+                await fetchWAMs();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+        
+        async function fetchWAMs() {
+            try {
+                const goalId = document.getElementById('wamGoal').value;
+                const url = goalId ? `${API_BASE}/wams?goal_id=${goalId}` : `${API_BASE}/wams`;
+                const response = await fetch(url);
+                
+                if (!response.ok) throw new Error('Failed to fetch WAMs');
+                
+                wams = await response.json();
+                renderWAMHistory();
+            } catch (error) {
+                console.error('Error fetching WAMs:', error);
+            }
+        }
+        
+        function renderWAMHistory() {
+            const container = document.getElementById('wamHistoryList');
+            
+            if (wams.length === 0) {
+                container.innerHTML = '<p style="color: #999;">No WAM records yet. Start your first weekly accountability meeting!</p>';
+                return;
+            }
+            
+            container.innerHTML = wams.map(wam => {
+                const scoreClass = wam.execution_score >= 85 ? 'high' : (wam.execution_score >= 60 ? 'medium' : 'low');
+                const goalName = wam.goal_id ? (goals.find(g => g.id === wam.goal_id)?.name || 'Unknown Goal') : 'All Goals';
+                
+                return `
+                    <div class="wam-item">
+                        <div class="wam-item-header">
+                            <span class="wam-item-week">Week ${wam.week_number} - ${goalName}</span>
+                            <div>
+                                <span class="wam-item-score ${scoreClass}">${wam.execution_score}%</span>
+                                <span class="wam-item-delete" onclick="deleteWAM(${wam.id})">🗑️</span>
+                            </div>
+                        </div>
+                        ${wam.notes ? `<div class="wam-item-notes"><strong>Notes:</strong> ${escapeHtml(wam.notes)}</div>` : ''}
+                        ${wam.plan_next ? `<div class="wam-item-plan"><strong>Next Week:</strong> ${escapeHtml(wam.plan_next)}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function deleteWAM(wamId) {
+            if (!confirm('Are you sure you want to delete this WAM record?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/wams/${wamId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Failed to delete WAM');
+                
+                await fetchWAMs();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
         
         // Event listeners

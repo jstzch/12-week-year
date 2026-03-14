@@ -17,6 +17,8 @@ class Goal(Base):
     
     # Relationship to tasks
     tasks = relationship("Task", back_populates="goal")
+    # Relationship to WAMs
+    wams = relationship("WAM", back_populates="goal")
 
 
 class Task(Base):
@@ -36,3 +38,20 @@ class Task(Base):
     
     # Relationship to goal
     goal = relationship("Goal", back_populates="tasks")
+
+
+class WAM(Base):
+    """WAM (Weekly Accountability Meeting) model."""
+    __tablename__ = "wams"
+
+    id = Column(Integer, primary_key=True, index=True)
+    goal_id = Column(Integer, ForeignKey("goals.id"), nullable=True)
+    week_number = Column(Integer, nullable=False)
+    execution_score = Column(Integer, nullable=False)  # 0-100
+    notes = Column(String, nullable=True)
+    plan_next = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship to goal
+    goal = relationship("Goal", back_populates="wams")
