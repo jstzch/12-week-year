@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from models import Task, Goal, WAM
 from schemas import TaskCreate, TaskUpdate, TaskStats, ExecutionScore, WeeklyReport, GoalCreate, GoalUpdate, GoalProgress
-from schemas import WAMCreate, WAMUpdate
+from schemas import WAMCreate, WAMUpdate, ScoreHistory, ScoreHistoryItem
 
 
 # ==================== Goal CRUD ====================
@@ -302,3 +302,28 @@ def delete_wam(db: Session, wam_id: int) -> bool:
 def get_wams_by_goal(db: Session, goal_id: int) -> List[WAM]:
     """Get all WAMs for a specific goal."""
     return db.query(WAM).filter(WAM.goal_id == goal_id).order_by(WAM.week_number.desc()).all()
+
+
+def get_score_history(db: Session, goal_id: int) -> Optional[ScoreHistory]:
+    """Get score history for a specific goal."""
+    db_goal = get_goal(db, goal_id)
+    if not db_goal:
+        return None
+    
+    wams = db.query(WAM).filter(WAM.goal_id == goal_id).order_by(WAM.week_number.asc()).all()
+    
+    scores = [
+        ScoreHistoryItem(
+            week_number=wam.week_number,
+            execution_score=wam.execution_score,
+            created_at=wam.created_at
+        )
+        for wam in wams
+    ]
+    
+    return ScoreHistory(
+        goal_id=goal_id,
+        goal_name=db_goal.name,
+        scores=scores,
+        target_line=85
+    )

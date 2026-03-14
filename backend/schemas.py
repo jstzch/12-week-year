@@ -1,6 +1,6 @@
 """Pydantic schemas for request/response validation."""
 from datetime import datetime
-from typing import Optional, Annotated
+from typing import Optional, List
 from pydantic import BaseModel, ConfigDict, computed_field
 
 
@@ -154,3 +154,24 @@ class WAM(WAMBase):
     updated_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
+
+
+# ==================== Score History Schemas ====================
+
+class ScoreHistoryItem(BaseModel):
+    """Schema for a single score history entry."""
+    week_number: int
+    execution_score: int
+    created_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ScoreHistory(BaseModel):
+    """Schema for score history response."""
+    goal_id: int
+    goal_name: str
+    scores: List[ScoreHistoryItem]
+    target_line: int = 85
+    
+    model_config = ConfigDict(populate_by_name=True)

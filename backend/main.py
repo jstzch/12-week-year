@@ -8,7 +8,7 @@ from database import get_db, init_db
 from models import Task, WAM
 from schemas import Task, TaskCreate, TaskUpdate, TaskStats, ExecutionScore, WeeklyReport
 from schemas import Goal, GoalCreate, GoalUpdate, GoalProgress
-from schemas import WAM, WAMCreate, WAMUpdate
+from schemas import WAM, WAMCreate, WAMUpdate, ScoreHistory
 import crud
 
 app = FastAPI()
@@ -97,6 +97,15 @@ def get_goal_progress(goal_id: int, db: Session = Depends(get_db)):
     if progress is None:
         raise HTTPException(status_code=404, detail="Goal not found")
     return progress
+
+
+@app.get("/api/goals/{goal_id}/scores", response_model=ScoreHistory)
+def get_goal_scores(goal_id: int, db: Session = Depends(get_db)):
+    """Get execution score history for a specific goal."""
+    score_history = crud.get_score_history(db, goal_id)
+    if score_history is None:
+        raise HTTPException(status_code=404, detail="Goal not found")
+    return score_history
 
 
 # ==================== Task Endpoints ====================
