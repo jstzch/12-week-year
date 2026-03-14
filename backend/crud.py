@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from models import Task, Goal, WAM
 from schemas import TaskCreate, TaskUpdate, TaskStats, ExecutionScore, WeeklyReport, GoalCreate, GoalUpdate, GoalProgress
-from schemas import WAMCreate, WAMUpdate
+from schemas import WAMCreate, WAMUpdate, ScoreHistory, ScoreHistoryResponse
 
 
 # ==================== Goal CRUD ====================
@@ -94,6 +94,26 @@ def get_goal_progress(db: Session, goal_id: int) -> Optional[GoalProgress]:
         completed_tasks=completed_tasks,
         score=round(score, 1),
         is_excellent=score >= 85
+    )
+
+
+def get_goal_scores(db: Session, goal_id: int) -> Optional[ScoreHistoryResponse]:
+    """Get score history for a specific goal."""
+    db_goal = get_goal(db, goal_id)
+    if not db_goal:
+        return None
+    
+    # Get WAM records for this goal
+    wams = db.query(WAM).filter(WAM.goal_id == goal_id).order_by(WAM.week_number.asc()).all()
+    
+    # Convert to score history
+    scores = [ScoreHistory(week_number=w.week_number, execution_score=w.execution_score) for w in wams]
+    
+    return ScoreHistoryResponse(
+        goal_id=db_goal.id,
+        goal_name=db_goal.name,
+        scores=scores,
+        target_score=85
     )
 
 

@@ -628,6 +628,52 @@
         .btn-delete-goal:hover {
             color: #fee2e2;
         }
+        
+        /* Score Chart */
+        .score-chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .score-chart-container h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        #scoreChart {
+            width: 100%;
+            height: 250px;
+        }
+        
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
     </style>
 </head>
 <body>
@@ -653,6 +699,22 @@
             <div class="goal-progress-stats">
                 <span id="progressTasks">0/0 tasks</span>
                 <span id="progressScore">Score: 0%</span>
+            </div>
+        </div>
+        
+        <!-- Score Chart -->
+        <div class="score-chart-container" id="scoreChartContainer" style="display: none;">
+            <h3>📈 Execution Score Trend</h3>
+            <canvas id="scoreChart"></canvas>
+            <div class="chart-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #667eea;"></div>
+                    <span>Score</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #10b981;"></div>
+                    <span>85% Target</span>
+                </div>
             </div>
         </div>
         
@@ -890,6 +952,144 @@
             renderGoalTabs();
             fetchTasks();
             fetchGoalProgress(goalId);
+            fetchGoalScores(goalId);
+        }
+        
+        // Fetch goal scores (history)
+        async function fetchGoalScores(goalId) {
+            try {
+                const response = await fetch(`${API_BASE}/goals/${goalId}/scores`);
+                if (!response.ok) throw new Error('Failed to fetch scores');
+                const data = await response.json();
+                renderScoreChart(data);
+            } catch (error) {
+                console.error('Error fetching goal scores:', error);
+                document.getElementById('scoreChartContainer').style.display = 'none';
+            }
+        }
+        
+        // Render score chart using Canvas
+        function renderScoreChart(data) {
+            const container = document.getElementById('scoreChartContainer');
+            const canvas = document.getElementById('scoreChart');
+            
+            if (!data.scores || data.scores.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            
+            // Set canvas size for high DPI
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const width = rect.width;
+            const height = rect.height;
+            const padding = { top: 20, right: 30, bottom: 40, left: 50 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Create data points for all 12 weeks
+            const scores = data.scores;
+            const targetScore = data.target_score || 85;
+            const weeks = [];
+            const scoreValues = [];
+            
+            // Fill in all 12 weeks
+            for (let w = 1; w <= 12; w++) {
+                weeks.push(w);
+                const found = scores.find(s => s.week_number === w);
+                scoreValues.push(found ? found.execution_score : null);
+            }
+            
+            // Draw grid
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 1;
+            
+            // Horizontal grid lines (0, 25, 50, 75, 100)
+            for (let i = 0; i <= 4; i++) {
+                const y = padding.top + (chartHeight * i / 4);
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+                
+                // Y-axis labels
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText((100 - i * 25) + '%', padding.left - 8, y + 4);
+            }
+            
+            // X-axis labels
+            ctx.textAlign = 'center';
+            weeks.forEach((week, i) => {
+                const x = padding.left + (chartWidth * i / 11);
+                ctx.fillText('W' + week, x, height - padding.bottom + 20);
+            });
+            
+            // Draw target line (85%)
+            const targetY = padding.top + chartHeight * (1 - targetScore / 100);
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(padding.left, targetY);
+            ctx.lineTo(width - padding.right, targetY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Draw score line
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            
+            let started = false;
+            scoreValues.forEach((score, i) => {
+                if (score !== null) {
+                    const x = padding.left + (chartWidth * i / 11);
+                    const y = padding.top + chartHeight * (1 - score / 100);
+                    
+                    if (!started) {
+                        ctx.moveTo(x, y);
+                        started = true;
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+            });
+            ctx.stroke();
+            
+            // Draw points and fill area
+            ctx.fillStyle = '#667eea';
+            scoreValues.forEach((score, i) => {
+                if (score !== null) {
+                    const x = padding.left + (chartWidth * i / 11);
+                    const y = padding.top + chartHeight * (1 - score / 100);
+                    
+                    // Point
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Score label
+                    ctx.fillStyle = '#333';
+                    ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif';
+                    ctx.fillText(score + '%', x, y - 10);
+                    ctx.fillStyle = '#667eea';
+                }
+            });
         }
         
         // Fetch goal progress
