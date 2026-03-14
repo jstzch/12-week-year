@@ -3,24 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>12-Week Year - Task Manager</title>
+    <title>12-Week Year - <span data-i18n="Task Manager">Task Manager</span></title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Language Toggle */
+        .lang-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 6px 12px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
         }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+        .lang-toggle:hover {
+            background: rgba(255,255,255,0.3);
         }
         
         .container {
             max-width: 900px;
             margin: 0 auto;
+            position: relative;
         }
         
         h1 {
@@ -703,13 +710,14 @@
 </head>
 <body>
     <div class="container">
+        <button class="lang-toggle" onclick="toggleLanguage()">🌐 <span data-i18n="lang">EN</span></button>
         <h1>📅 12-Week Year</h1>
-        <p class="subtitle">Track your goals and measure your progress</p>
+        <p class="subtitle" data-i18n="Track your goals and measure your progress">Track your goals and measure your progress</p>
         
         <!-- Goal Tabs -->
         <div class="goal-tabs" id="goalTabs">
-            <button class="btn-new-goal" onclick="showNewGoalModal()">+ New Goal</button>
-            <button class="btn-new-goal" style="background: #8b5cf6;" onclick="showWAMModal()">📋 WAM</button>
+            <button class="btn-new-goal" onclick="showNewGoalModal()" data-i18n="+ New Goal">+ New Goal</button>
+            <button class="btn-new-goal" style="background: #8b5cf6;" onclick="showWAMModal()">📋 <span data-i18n="WAM">WAM</span></button>
         </div>
         
         <!-- Goal Progress -->
@@ -722,33 +730,33 @@
                 <div class="goal-progress-fill" id="progressBar" style="width: 0%"></div>
             </div>
             <div class="goal-progress-stats">
-                <span id="progressTasks">0/0 tasks</span>
-                <span id="progressScore">Score: 0%</span>
+                <span id="progressTasks">0/0 <span data-i18n="tasks">tasks</span></span>
+                <span id="progressScore"><span data-i18n="Score">Score</span>: 0%</span>
             </div>
             <div class="weekly-plan-section">
-                <label for="weeklyPlanInput">📅 Weekly Plan:</label>
+                <label for="weeklyPlanInput">📅 <span data-i18n="Weekly Plan">Weekly Plan</span>:</label>
                 <input type="number" id="weeklyPlanInput" min="0" max="50" value="0" style="width: 60px; padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd;">
-                <span>tasks</span>
-                <button onclick="updateWeeklyPlan()" style="margin-left: 10px; padding: 4px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">Set</button>
+                <span data-i18n="tasks">tasks</span>
+                <button onclick="updateWeeklyPlan()" style="margin-left: 10px; padding: 4px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;" data-i18n="Set">Set</button>
             </div>
             <div class="weekly-progress-stats" id="weeklyProgressStats" style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; display: none;">
-                <span id="weeklyPlanProgress">This week: 0/0 completed</span>
-                <span id="weeklyPlanRate" style="margin-left: 15px;">Rate: 0%</span>
+                <span id="weeklyPlanProgress"><span data-i18n="This week">This week</span>: 0/0 <span data-i18n="completed">completed</span></span>
+                <span id="weeklyPlanRate" style="margin-left: 15px;"><span data-i18n="Rate">Rate</span>: 0%</span>
             </div>
         </div>
         
         <!-- Score Chart -->
         <div class="score-chart-container" id="scoreChartContainer" style="display: none;">
-            <h3>📈 Execution Score Trend</h3>
+            <h3>📈 <span data-i18n="Execution Score Trend">Execution Score Trend</span></h3>
             <canvas id="scoreChart"></canvas>
             <div class="chart-legend">
                 <div class="legend-item">
                     <div class="legend-color" style="background: #667eea;"></div>
-                    <span>Score</span>
+                    <span data-i18n="Score">Score</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-color" style="background: #10b981;"></div>
-                    <span>85% Target</span>
+                    <span>85% <span data-i18n="Target">Target</span></span>
                 </div>
             </div>
         </div>
@@ -756,28 +764,28 @@
         <!-- Stats Section -->
         <div class="stats-grid">
             <div class="stat-card">
-                <h3>Total Tasks</h3>
+                <h3 data-i18n="Total Tasks">Total Tasks</h3>
                 <div class="value" id="totalTasks">0</div>
             </div>
             <div class="stat-card">
-                <h3>Completed</h3>
+                <h3 data-i18n="Completed">Completed</h3>
                 <div class="value" id="completedTasks">0</div>
             </div>
             <div class="stat-card">
-                <h3>Execution Score</h3>
+                <h3 data-i18n="Execution Score">Execution Score</h3>
                 <div class="value score" id="executionScore">--</div>
             </div>
             <div class="stat-card">
-                <h3>Week Progress</h3>
+                <h3 data-i18n="Week Progress">Week Progress</h3>
                 <div class="value" id="weekProgress">0%</div>
             </div>
             <div class="stat-card" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
-                <h3>📍 Lead (Actions)</h3>
+                <h3>📍 <span data-i18n="Lead (Actions)">Lead (Actions)</span></h3>
                 <div class="value" id="leadStats">0/0</div>
                 <div class="stat-sub" id="leadRate">0%</div>
             </div>
             <div class="stat-card" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);">
-                <h3>🎯 Lag (Results)</h3>
+                <h3>🎯 <span data-i18n="Lag (Results)">Lag (Results)</span></h3>
                 <div class="value" id="lagStats">0/0</div>
                 <div class="stat-sub" id="lagRate">0%</div>
             </div>
@@ -789,35 +797,35 @@
             
             <!-- Add Task Form -->
             <form class="add-task-form" id="addTaskForm">
-                <input type="text" id="taskTitle" placeholder="Enter task title..." required>
+                <input type="text" id="taskTitle" placeholder="Enter task title..." data-i18n-placeholder="Enter task title..." required>
                 <select id="taskGoal">
-                    <option value="">No Goal</option>
+                    <option value="" data-i18n="No Goal">No Goal</option>
                 </select>
                 <select id="taskPriority">
-                    <option value="low">Low Priority</option>
-                    <option value="medium" selected>Medium Priority</option>
-                    <option value="high">High Priority</option>
+                    <option value="low" data-i18n="Low Priority">Low Priority</option>
+                    <option value="medium" selected data-i18n="Medium Priority">Medium Priority</option>
+                    <option value="high" data-i18n="High Priority">High Priority</option>
                 </select>
                 <select id="taskStatus">
-                    <option value="pending">Pending</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="completed">Completed</option>
+                    <option value="pending" data-i18n="Pending">Pending</option>
+                    <option value="in_progress" data-i18n="In Progress">In Progress</option>
+                    <option value="completed" data-i18n="Completed">Completed</option>
                 </select>
                 <select id="taskIndicator">
-                    <option value="lead" title="Controllable action">📍 Lead (Action)</option>
-                    <option value="lag" title="Result outcome">🎯 Lag (Result)</option>
+                    <option value="lead" title="Controllable action">📍 <span data-i18n="Lead (Action)">Lead (Action)</span></option>
+                    <option value="lag" title="Result outcome">🎯 <span data-i18n="Lag (Result)">Lag (Result)</span></option>
                 </select>
-                <button type="submit">Add Task</button>
+                <button type="submit" data-i18n="Add Task">Add Task</button>
             </form>
             
             <!-- Task List -->
             <ul class="task-list" id="taskList">
-                <li class="loading">Loading tasks...</li>
+                <li class="loading" data-i18n="Loading tasks...">Loading tasks...</li>
             </ul>
             
             <!-- Weekly Report -->
             <div class="weekly-report" id="weeklyReport" style="display: none;">
-                <h3>📊 Weekly Report</h3>
+                <h3>📊 <span data-i18n="Weekly Report">Weekly Report</span></h3>
                 <div class="report-stats" id="reportStats"></div>
             </div>
         </div>
@@ -826,12 +834,12 @@
     <!-- New Goal Modal -->
     <div class="modal-overlay" id="newGoalModal">
         <div class="modal">
-            <h2>Create New Goal</h2>
+            <h2 data-i18n="Create New Goal">Create New Goal</h2>
             <form onsubmit="createGoal(event)">
-                <input type="text" id="goalName" placeholder="Enter goal name..." required>
+                <input type="text" id="goalName" placeholder="Enter goal name..." data-i18n-placeholder="Enter goal name..." required>
                 <div class="modal-buttons">
-                    <button type="button" class="btn-cancel" onclick="hideNewGoalModal()">Cancel</button>
-                    <button type="submit" class="btn-submit">Create Goal</button>
+                    <button type="button" class="btn-cancel" onclick="hideNewGoalModal()" data-i18n="Cancel">Cancel</button>
+                    <button type="submit" class="btn-submit" data-i18n="Create Goal">Create Goal</button>
                 </div>
             </form>
         </div>
@@ -840,45 +848,45 @@
     <!-- WAM Modal -->
     <div class="modal-overlay" id="wamModal">
         <div class="modal" style="max-width: 600px;">
-            <h2>📋 Weekly Accountability Meeting</h2>
-            <p style="color: #666; margin-bottom: 20px;">Review your progress and plan for the next week</p>
+            <h2>📋 <span data-i18n="Weekly Accountability Meeting">Weekly Accountability Meeting</span></h2>
+            <p style="color: #666; margin-bottom: 20px;" data-i18n="Review your progress and plan for the next week">Review your progress and plan for the next week</p>
             
             <!-- WAM Form -->
             <form onsubmit="createWAM(event)" id="wamForm">
                 <div class="form-group">
-                    <label for="wamGoal">Goal (Optional)</label>
+                    <label for="wamGoal" data-i18n="Goal (Optional)">Goal (Optional)</label>
                     <select id="wamGoal">
-                        <option value="">All Goals</option>
+                        <option value="" data-i18n="All Goals">All Goals</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="wamWeek">Week Number</label>
+                    <label for="wamWeek" data-i18n="Week Number">Week Number</label>
                     <input type="number" id="wamWeek" min="1" max="12" value="1" required>
                 </div>
                 <div class="form-group">
-                    <label for="wamScore">Execution Score (0-100)</label>
+                    <label for="wamScore" data-i18n="Execution Score (0-100)">Execution Score (0-100)</label>
                     <input type="number" id="wamScore" min="0" max="100" value="0" required>
                     <div class="score-slider">
                         <input type="range" id="wamScoreSlider" min="0" max="100" value="0" oninput="document.getElementById('wamScore').value = this.value">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="wamNotes">Meeting Notes</label>
-                    <textarea id="wamNotes" placeholder="What happened this week? What worked? What didn't?" rows="3"></textarea>
+                    <label for="wamNotes" data-i18n="Meeting Notes">Meeting Notes</label>
+                    <textarea id="wamNotes" placeholder="What happened this week? What worked? What didn't?" data-i18n-placeholder="What happened this week? What worked? What didn't?" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="wamPlan">Next Week Plan</label>
-                    <textarea id="wamPlan" placeholder="What will you focus on next week?" rows="3"></textarea>
+                    <label for="wamPlan" data-i18n="Next Week Plan">Next Week Plan</label>
+                    <textarea id="wamPlan" placeholder="What will you focus on next week?" data-i18n-placeholder="What will you focus on next week?" rows="3"></textarea>
                 </div>
                 <div class="modal-buttons">
-                    <button type="button" class="btn-cancel" onclick="hideWAMModal()">Cancel</button>
-                    <button type="submit" class="btn-submit">Save WAM</button>
+                    <button type="button" class="btn-cancel" onclick="hideWAMModal()" data-i18n="Cancel">Cancel</button>
+                    <button type="submit" class="btn-submit" data-i18n="Save WAM">Save WAM</button>
                 </div>
             </form>
             
             <!-- WAM History -->
             <div class="wam-history" id="wamHistory" style="margin-top: 30px;">
-                <h3>📜 WAM History</h3>
+                <h3>📜 <span data-i18n="WAM History">WAM History</span></h3>
                 <div id="wamHistoryList"></div>
             </div>
         </div>
@@ -886,6 +894,205 @@
 
     <script>
         const API_BASE = 'https://one2-week-year.onrender.com/api';
+        
+        // Translations
+        const translations = {
+            zh: {
+                "Task Manager": "任务管理器",
+                "Track your goals and measure your progress": "追踪目标，衡量进度",
+                "+ New Goal": "+ 新建目标",
+                "WAM": "周检视",
+                "Week": "周",
+                "tasks": "任务",
+                "Score": "得分",
+                "Weekly Plan": "周计划",
+                "Set": "设置",
+                "This week": "本周",
+                "completed": "已完成",
+                "Rate": "完成率",
+                "Execution Score Trend": "执行力得分趋势",
+                "Target": "目标",
+                "Total Tasks": "总任务",
+                "Completed": "已完成",
+                "Execution Score": "执行力得分",
+                "Week Progress": "周进度",
+                "Lead (Actions)": "引领行动",
+                "Lag (Results)": "滞后结果",
+                "Enter task title...": "输入任务标题...",
+                "No Goal": "无目标",
+                "Low Priority": "低优先级",
+                "Medium Priority": "中优先级",
+                "High Priority": "高优先级",
+                "Pending": "待处理",
+                "In Progress": "进行中",
+                "Completed": "已完成",
+                "Lead (Action)": "引领行动",
+                "Lag (Result)": "滞后结果",
+                "Add Task": "添加任务",
+                "Weekly Report": "周报",
+                "Create New Goal": "创建新目标",
+                "Enter goal name...": "输入目标名称...",
+                "Cancel": "取消",
+                "Create Goal": "创建目标",
+                "Weekly Accountability Meeting": "周 Accountability 会议",
+                "Review your progress and plan for the next week": "回顾你的进度并规划下周",
+                "Goal (Optional)": "目标（可选）",
+                "All Goals": "所有目标",
+                "Week Number": "周数",
+                "Execution Score (0-100)": "执行力得分 (0-100)",
+                "Meeting Notes": "会议记录",
+                "What happened this week? What worked? What didn't?": "本周发生了什么？什么有效？什么无效？",
+                "Next Week Plan": "下周计划",
+                "What will you focus on next week?": "下周你将专注于什么？",
+                "Save WAM": "保存周检视",
+                "WAM History": "周检视历史",
+                "Notes": "记录",
+                "Next Week": "下周",
+                "Unknown Goal": "未知目标",
+                "No tasks yet. Add your first task above! 🎯": "暂无任务。在上方添加你的第一个任务！🎯",
+                "Loading tasks...": "加载任务中...",
+                "Are you sure you want to delete this task?": "确定要删除这个任务吗？",
+                "Are you sure you want to delete this WAM record?": "确定要删除这条周检视记录吗？",
+                "No WAM records yet. Start your first weekly accountability meeting!": "暂无周检视记录。开始你的第一次周 Accountability 会议！",
+                "Unable to connect to server. Make sure the backend is running on port 8000.": "无法连接服务器。请确保后端运行在 8000 端口。",
+                "Failed to create goal": "创建目标失败",
+                "Failed to add task": "添加任务失败",
+                "Failed to update task": "更新任务失败",
+                "Failed to delete task": "删除任务失败",
+                "Low": "低",
+                "Medium": "中",
+                "High": "高",
+                "lead": "引领",
+                "lag": "滞后",
+                "↩️ Undo": "↩️ 撤销",
+                "✅ Complete": "✅ 完成",
+                "🗑️ Delete": "🗑️ 删除",
+                "📍 Lead": "📍 引领",
+                "🎯 Lag": "🎯 滞后",
+                "Tasks This Week": "本周任务",
+                "Completed This Week": "本周完成",
+                "Completion Rate": "完成率",
+                "Streak": "连续天数"
+            },
+            en: {
+                "Task Manager": "Task Manager",
+                "Track your goals and measure your progress": "Track your goals and measure your progress",
+                "+ New Goal": "+ New Goal",
+                "WAM": "WAM",
+                "Week": "Week",
+                "tasks": "tasks",
+                "Score": "Score",
+                "Weekly Plan": "Weekly Plan",
+                "Set": "Set",
+                "This week": "This week",
+                "completed": "completed",
+                "Rate": "Rate",
+                "Execution Score Trend": "Execution Score Trend",
+                "Target": "Target",
+                "Total Tasks": "Total Tasks",
+                "Completed": "Completed",
+                "Execution Score": "Execution Score",
+                "Week Progress": "Week Progress",
+                "Lead (Actions)": "Lead (Actions)",
+                "Lag (Results)": "Lag (Results)",
+                "Enter task title...": "Enter task title...",
+                "No Goal": "No Goal",
+                "Low Priority": "Low Priority",
+                "Medium Priority": "Medium Priority",
+                "High Priority": "High Priority",
+                "Pending": "Pending",
+                "In Progress": "In Progress",
+                "Completed": "Completed",
+                "Lead (Action)": "Lead (Action)",
+                "Lag (Result)": "Lag (Result)",
+                "Add Task": "Add Task",
+                "Weekly Report": "Weekly Report",
+                "Create New Goal": "Create New Goal",
+                "Enter goal name...": "Enter goal name...",
+                "Cancel": "Cancel",
+                "Create Goal": "Create Goal",
+                "Weekly Accountability Meeting": "Weekly Accountability Meeting",
+                "Review your progress and plan for the next week": "Review your progress and plan for the next week",
+                "Goal (Optional)": "Goal (Optional)",
+                "All Goals": "All Goals",
+                "Week Number": "Week Number",
+                "Execution Score (0-100)": "Execution Score (0-100)",
+                "Meeting Notes": "Meeting Notes",
+                "What happened this week? What worked? What didn't?": "What happened this week? What worked? What didn't?",
+                "Next Week Plan": "Next Week Plan",
+                "What will you focus on next week?": "What will you focus on next week?",
+                "Save WAM": "Save WAM",
+                "WAM History": "WAM History",
+                "Notes": "Notes",
+                "Next Week": "Next Week",
+                "Unknown Goal": "Unknown Goal",
+                "No tasks yet. Add your first task above! 🎯": "No tasks yet. Add your first task above! 🎯",
+                "Loading tasks...": "Loading tasks...",
+                "Are you sure you want to delete this task?": "Are you sure you want to delete this task?",
+                "Are you sure you want to delete this WAM record?": "Are you sure you want to delete this WAM record?",
+                "No WAM records yet. Start your first weekly accountability meeting!": "No WAM records yet. Start your first weekly accountability meeting!",
+                "Unable to connect to server. Make sure the backend is running on port 8000.": "Unable to connect to server. Make sure the backend is running on port 8000.",
+                "Failed to create goal": "Failed to create goal",
+                "Failed to add task": "Failed to add task",
+                "Failed to update task": "Failed to update task",
+                "Failed to delete task": "Failed to delete task",
+                "Low": "Low",
+                "Medium": "Medium",
+                "High": "High",
+                "lead": "lead",
+                "lag": "lag",
+                "↩️ Undo": "↩️ Undo",
+                "✅ Complete": "✅ Complete",
+                "🗑️ Delete": "🗑️ Delete",
+                "📍 Lead": "📍 Lead",
+                "🎯 Lag": "🎯 Lag",
+                "Tasks This Week": "Tasks This Week",
+                "Completed This Week": "Completed This Week",
+                "Completion Rate": "Completion Rate",
+                "Streak": "Streak"
+            }
+        };
+        
+        // Current language (default to English)
+        let currentLang = localStorage.getItem('lang') || 'en';
+        
+        // Apply translations
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.textContent = translations[currentLang][key];
+                }
+            });
+            
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[currentLang][key]) {
+                    el.placeholder = translations[currentLang][key];
+                }
+            });
+            
+            // Update language toggle button
+            document.querySelector('.lang-toggle span').textContent = currentLang.toUpperCase();
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            localStorage.setItem('lang', currentLang);
+            applyTranslations();
+            // Re-render dynamic content
+            renderTasks();
+            renderGoalTabs();
+            renderGoalProgress(document.getElementById('goalProgress').dataset.progress ? JSON.parse(document.getElementById('goalProgress').dataset.progress) : null);
+            updateStats();
+            renderWAMHistory();
+        }
+        
+        // Helper to get translation
+        function t(key) {
+            return translations[currentLang][key] || key;
+        }
         
         // State
         let tasks = [];
@@ -969,7 +1176,7 @@
         // Render goal tabs
         function renderGoalTabs() {
             const tabsContainer = document.getElementById('goalTabs');
-            const newGoalBtn = `<button class="btn-new-goal" onclick="showNewGoalModal()">+ New Goal</button>`;
+            const newGoalBtn = `<button class="btn-new-goal" onclick="showNewGoalModal()">${t('+ New Goal')}</button>`;
             
             if (goals.length === 0) {
                 tabsContainer.innerHTML = newGoalBtn;
@@ -981,7 +1188,7 @@
                 <button class="goal-tab ${goal.id === currentGoalId ? 'active' : ''}" 
                     onclick="selectGoal(${goal.id})">
                     ${escapeHtml(goal.name)}
-                    <span class="week-badge">W${goal.week_number}/12</span>
+                    <span class="week-badge">${t('Week')}${goal.week_number}/12</span>
                 </button>
             `).join('');
             
@@ -991,7 +1198,7 @@
         // Update goal select dropdown
         function updateGoalSelect() {
             const select = document.getElementById('taskGoal');
-            select.innerHTML = '<option value="">No Goal</option>' + 
+            select.innerHTML = `<option value="">${t('No Goal')}</option>` + 
                 goals.map(g => `<option value="${g.id}">${escapeHtml(g.name)}</option>`).join('');
         }
         
@@ -1163,12 +1370,12 @@
             progressEl.style.display = 'block';
             
             document.getElementById('progressGoalName').textContent = data.goal_name;
-            document.getElementById('progressWeek').textContent = `Week ${data.week_number}/12`;
+            document.getElementById('progressWeek').textContent = `${t('Week')} ${data.week_number}/12`;
             document.getElementById('progressBar').style.width = `${data.score}%`;
             document.getElementById('progressTasks').textContent = 
-                `${data.completed_tasks}/${data.total_tasks} tasks`;
+                `${data.completed_tasks}/${data.total_tasks} ${t('tasks')}`;
             document.getElementById('progressScore').textContent = 
-                `Score: ${data.score}%`;
+                `${t('Score')}: ${data.score}%`;
         }
         
         // Update weekly plan
@@ -1208,9 +1415,9 @@
                 weeklyProgressStats.style.display = 'block';
                 
                 document.getElementById('weeklyPlanProgress').textContent = 
-                    `This week: ${data.completed_this_week}/${data.weekly_plan} completed`;
+                    `${t('This week')}: ${data.completed_this_week}/${data.weekly_plan} ${t('completed')}`;
                 document.getElementById('weeklyPlanRate').textContent = 
-                    `Rate: ${data.completion_rate}%`;
+                    `${t('Rate')}: ${data.completion_rate}%`;
             } catch (error) {
                 console.error('Error fetching weekly progress:', error);
             }
@@ -1230,7 +1437,7 @@
                 updateStats();
             } catch (error) {
                 console.error('Error fetching tasks:', error);
-                taskList.innerHTML = `<li class="empty-state"><p>Unable to connect to server. Make sure the backend is running on port 8000.</p></li>`;
+                taskList.innerHTML = `<li class="empty-state"><p>${t('Unable to connect to server. Make sure the backend is running on port 8000.')}</p></li>`;
             }
         }
         
@@ -1268,19 +1475,19 @@
             weeklyReport.style.display = 'block';
             reportStats.innerHTML = `
                 <div class="report-stat">
-                    <div class="label">Tasks This Week</div>
+                    <div class="label">${t('Tasks This Week')}</div>
                     <div class="value">${data.tasks_this_week || 0}</div>
                 </div>
                 <div class="report-stat">
-                    <div class="label">Completed This Week</div>
+                    <div class="label">${t('Completed This Week')}</div>
                     <div class="value">${data.completed_this_week || 0}</div>
                 </div>
                 <div class="report-stat">
-                    <div class="label">Completion Rate</div>
+                    <div class="label">${t('Completion Rate')}</div>
                     <div class="value">${data.completion_rate || 0}%</div>
                 </div>
                 <div class="report-stat">
-                    <div class="label">Streak</div>
+                    <div class="label">${t('Streak')}</div>
                     <div class="value">${data.streak || 0} days</div>
                 </div>
             `;
@@ -1320,7 +1527,7 @@
             if (tasks.length === 0) {
                 taskList.innerHTML = `
                     <li class="empty-state">
-                        <p>No tasks yet. Add your first task above! 🎯</p>
+                        <p>${t("No tasks yet. Add your first task above! 🎯")}</p>
                     </li>
                 `;
                 return;
@@ -1335,16 +1542,16 @@
                         <div class="task-title ${task.completed ? 'completed' : ''}">${escapeHtml(task.title)}</div>
                         <div class="task-meta">
                             ${task.goal_id ? `<span class="task-goal-badge">${escapeHtml(getGoalName(task.goal_id))}</span>` : ''}
-                            <span class="badge badge-${task.status || 'pending'}">${task.status || 'pending'}</span>
-                            <span class="badge badge-${task.priority || 'medium'}">${task.priority || 'medium'}</span>
-                            <span class="badge badge-${task.indicator_type === 'lead' ? 'lead' : 'lag'}">${task.indicator_type === 'lead' ? '📍 Lead' : '🎯 Lag'}</span>
+                            <span class="badge badge-${task.status || 'pending'}">${t(task.status || 'pending')}</span>
+                            <span class="badge badge-${task.priority || 'medium'}">${t(task.priority || 'medium')}</span>
+                            <span class="badge badge-${task.indicator_type === 'lead' ? 'lead' : 'lag'}">${task.indicator_type === 'lead' ? t('📍 Lead') : t('🎯 Lag')}</span>
                         </div>
                     </div>
                     <div class="task-actions">
                         <button class="btn btn-complete" onclick="toggleComplete(${task.id}, ${!task.completed})">
-                            ${task.completed ? '↩️ Undo' : '✅ Complete'}
+                            ${task.completed ? t('↩️ Undo') : t('✅ Complete')}
                         </button>
-                        <button class="btn btn-delete" onclick="deleteTask(${task.id})">🗑️ Delete</button>
+                        <button class="btn btn-delete" onclick="deleteTask(${task.id})">${t('🗑️ Delete')}</button>
                     </div>
                 </li>
             `).join('');
@@ -1437,14 +1644,14 @@
         
         // Delete task
         async function deleteTask(taskId) {
-            if (!confirm('Are you sure you want to delete this task?')) return;
+            if (!confirm(t('Are you sure you want to delete this task?'))) return;
             
             try {
                 const response = await fetch(`${API_BASE}/tasks/${taskId}`, {
                     method: 'DELETE'
                 });
                 
-                if (!response.ok) throw new Error('Failed to delete task');
+                if (!response.ok) throw new Error(t('Failed to delete task'));
                 
                 await fetchTasks();
                 
@@ -1453,7 +1660,7 @@
                     fetchGoalProgress(currentGoalId);
                 }
             } catch (error) {
-                showError('Failed to delete task: ' + error.message);
+                showError(t('Failed to delete task') + ': ' + error.message);
             }
         }
         
@@ -1480,7 +1687,7 @@
         
         function populateWAMGoalSelect() {
             const select = document.getElementById('wamGoal');
-            select.innerHTML = '<option value="">All Goals</option>';
+            select.innerHTML = `<option value="">${t('All Goals')}</option>`;
             goals.forEach(goal => {
                 const option = document.createElement('option');
                 option.value = goal.id;
@@ -1546,32 +1753,32 @@
             const container = document.getElementById('wamHistoryList');
             
             if (wams.length === 0) {
-                container.innerHTML = '<p style="color: #999;">No WAM records yet. Start your first weekly accountability meeting!</p>';
+                container.innerHTML = `<p style="color: #999;">${t("No WAM records yet. Start your first weekly accountability meeting!")}</p>`;
                 return;
             }
             
             container.innerHTML = wams.map(wam => {
                 const scoreClass = wam.execution_score >= 85 ? 'high' : (wam.execution_score >= 60 ? 'medium' : 'low');
-                const goalName = wam.goal_id ? (goals.find(g => g.id === wam.goal_id)?.name || 'Unknown Goal') : 'All Goals';
+                const goalName = wam.goal_id ? (goals.find(g => g.id === wam.goal_id)?.name || 'Unknown Goal') : t('All Goals');
                 
                 return `
                     <div class="wam-item">
                         <div class="wam-item-header">
-                            <span class="wam-item-week">Week ${wam.week_number} - ${goalName}</span>
+                            <span class="wam-item-week">${t('Week')} ${wam.week_number} - ${goalName}</span>
                             <div>
                                 <span class="wam-item-score ${scoreClass}">${wam.execution_score}%</span>
                                 <span class="wam-item-delete" onclick="deleteWAM(${wam.id})">🗑️</span>
                             </div>
                         </div>
-                        ${wam.notes ? `<div class="wam-item-notes"><strong>Notes:</strong> ${escapeHtml(wam.notes)}</div>` : ''}
-                        ${wam.plan_next ? `<div class="wam-item-plan"><strong>Next Week:</strong> ${escapeHtml(wam.plan_next)}</div>` : ''}
+                        ${wam.notes ? `<div class="wam-item-notes"><strong>${t('Notes')}:</strong> ${escapeHtml(wam.notes)}</div>` : ''}
+                        ${wam.plan_next ? `<div class="wam-item-plan"><strong>${t('Next Week')}:</strong> ${escapeHtml(wam.plan_next)}</div>` : ''}
                     </div>
                 `;
             }).join('');
         }
         
         async function deleteWAM(wamId) {
-            if (!confirm('Are you sure you want to delete this WAM record?')) return;
+            if (!confirm(t('Are you sure you want to delete this WAM record?'))) return;
             
             try {
                 const response = await fetch(`${API_BASE}/wams/${wamId}`, {
@@ -1586,16 +1793,11 @@
             }
         }
         
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
         // Event listeners
         addTaskForm.addEventListener('submit', addTask);
         
         // Initial load
+        applyTranslations();
         fetchGoals();
         fetchTasks();
         fetchScore();
